@@ -1,7 +1,7 @@
 library(lmtp)
 library(sl3)
 
-box::use(../R/blip[estimate_blip_multi_sl3])
+box::use(../R/blip[...])
 
 progressr::handlers(global = TRUE)
 
@@ -60,26 +60,17 @@ tsm_1 <- onestep(shift = policy_factory(1))
 tsm_2 <- onestep(shift = policy_factory(2))
 tsm_3 <- onestep(shift = policy_factory(3))
 
-type_2_blip <- function(...) {
-  objs <- list(...)
-  purrr::map_dfc(objs, \(x) x$eif) |>
-    setNames(paste0("blip", seq_along(objs))) |>
-    as.data.frame() |>
-    (\(x) x - rowMeans(x))()
-}
-
 # estimate the blip function
 data_cat_realistic <- cbind(data_cat_realistic, type_2_blip(tsm_1, tsm_2, tsm_3))
 blip_estimates <- estimate_blip_multi_sl3(data_cat_realistic, w, paste0("blip", 1:3), b_learner, 10)
-data_cat_dv <- data.table::copy(data_cat_realistic)
 
 # assign trt based on optimal rule
-rule <-
-  c(1, 2, 3)[max.col(blip_estimates)] |>
+rule <- find_optimal_rule(1:3, blip_estimates) |>
   factor(levels = 1:3)
 
+data_cat_dv <- data.table::copy(data_cat_realistic)
 data_cat_dv[, A := rule]
-data_cat_dv[, A := factor(tmle_spec$return_rule, levels = 1:3)]
+# data_cat_dv[, A := factor(tmle_spec$return_rule, levels = 1:3)]
 
 # estimate the TSM under the optimal rule
 optimal <- lmtp_tmle(

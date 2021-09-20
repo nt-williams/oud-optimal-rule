@@ -3,19 +3,9 @@ library(SuperLearner)
 
 oud <- import_some_data
 
-# All patients recieve methadone
-policy_methadone <- function(data, trt) {
-  rep("methadone", length(data[[trt]]))
-}
-
-# All patients recieve XR-NTX
-policy_xrntx <- function(data, trt) {
-  rep("xrntx", length(data[[trt]]))
-}
-
-# All patients receive BUP-NX
-policy_bupnx <- function(data, trt) {
-  rep("bupnx", length(data[[trt]]))
+drug_factory <- function(x = c("methadone", "xrntx", "bupnx")) {
+  x <- match.arg(x)
+  \(data, trt) factor(rep(x, nrow(data)), levels = c("methadone", "xrntx", "bupnx"))
 }
 
 # Return the treatment that minimizes the conditional risk of relapse
@@ -25,9 +15,9 @@ dv <- function(risk_methadone, risk_xrntx, risk_bupnx) {
 }
 
 # obtain the EIFs for the counterfactual risks of relapse under different trts
-est_methadone <- lmtp_tmle(..., shift = policy_methadone)
-est_xrntx <- lmtp_tmle(..., shift = policy_xrntx)
-est_bupnx <- lmtp_tmle(..., shift = policy_bupnx)
+est_methadone <- lmtp_sdr(..., shift = drug_factory("methadone"))
+est_xrntx <- lmtp_sdr(..., shift = drug_factory("xrntx"))
+est_bupnx <- lmtp_sdr(..., shift = drug_factory("bupnx"))
 
 # regress EIFs on covariates to obtain counterfactual estimates conditional on covariates?
 conditional_risk_methadone <- est_methadone$eif ~ w
