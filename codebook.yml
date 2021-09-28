@@ -1,0 +1,100 @@
+who:
+  label: Patient unique ID number
+
+sex:
+  label: Sex
+  cb:
+    1: Male
+    2: Female
+
+age:
+  label: Age (years)
+
+xrace:
+  label: Race and Hispanic ethnicity
+  cb:
+    1: Non-Hispanic white
+    2: Non-Hispanic African American
+    3: Hispanic
+    4: Other
+
+rand_dt:
+  label: Randomization date
+
+medicine:
+  label: Medicine type given
+  cb:
+    met: Methadone
+    bup: Bupenorphine
+    nal: Naltrexone
+
+hwithdraw:
+  label: Highest level of COWS/SOWS at or before randomization
+
+switched_meds:
+  label: Whether a patient switched medicines during treatment
+  cb: &binary
+    0: "No"
+    1: "Yes"
+
+never_initiated:
+  label: Whether a patient never initiated treatment
+  cb: *binary
+
+alcdisorder:
+  label: History of alcohol use disorder (past year)
+  cb: *binary
+
+cocdisorder:
+  label: History of cocaine use disorder (past year)
+  cb: *binary
+
+hasBrainDamage:
+  label: Has brain damage
+  cb: *binary
+
+hasEpilepsy:
+  label: Has epilepsy
+  cb: *binary
+
+hasSchiz:
+  label: Has schizophrenia
+  cb: *binary
+
+hasBipolar:
+  label: Has bipolar disorder
+  cb: *binary
+
+hasAnxPan:
+  label: Has anxiety or pain disorder
+  cb: *binary
+
+hasMajorDep:
+  label: Has major depression
+  cb: *binary
+
+bamphetamine30_base:
+  label: Amphetamines in 30 days before baseline
+  cb: *binary
+
+bcannabis30_base:
+  label: Cannabis in 30 days before baseline
+  cb: *binary
+
+bbenzo30_base:
+  label: Benzodiazepines in 30 days before baseline
+  cb: *binary
+
+ivdrug:
+  label: IV drug use in 30 days before baseline
+  cb: *binary
+
+relapse_date:
+  label: Date considered to be the patients first relapse
+
+weeks_to_relapse:
+  label: Estimated number of weeks between randomization date and date of first relapse
+
+week_12_relapse:
+  label: Relapse by 12-weeks post-randomization
+  cb: *binary

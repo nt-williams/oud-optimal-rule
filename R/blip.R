@@ -96,6 +96,14 @@ estimate_blip_multi_singlevar <- function(data, covar, blip, nfolds) {
   )
 }
 
+screen.corRankBest <- function(Y, X, family, method = "kendall", rank = 1, ...) {
+  listp <- apply(X, 2, function(x, Y, method) {
+    ifelse(stats::var(x) <= 0, 1, stats::cor.test(x, y = Y, method = method)$p.value)
+  }, Y = Y, method = method)
+
+  rank(listp) <= rank
+}
+
 fit_blip_multi_singlevar <- function(fold, data, covar, blip) {
   train <- origami::training(data, fold)
   valid <- origami::validation(data, fold)
@@ -115,9 +123,9 @@ fit_blip_multi_singlevar <- function(fold, data, covar, blip) {
 
   corRank_screen_then_glm <- sl3::make_learner(
     sl3::Lrnr_multivariate,
-    Pipeline$new(
-      Lrnr_pkg_SuperLearner_screener$new("screen.corRankBest"),
-      Lrnr_glm_fast$new()
+    sl3::Pipeline$new(
+      sl3::Lrnr_pkg_SuperLearner_screener$new("screen.corRankBest"),
+      sl3::Lrnr_glm_fast$new()
     )
   )
 
@@ -133,14 +141,6 @@ get_selected <- function(fit) {
   fit$fit_object$learner_fits$Lrnr_pkg_SuperLearner_screener_screen.corRankBest$fit_object$selected
 }
 
-screen.corRankBest <- function(Y, X, family, method = "kendall", rank = 1, ...) {
-  listp <- apply(X, 2, function(x, Y, method) {
-    ifelse(stats::var(x) <= 0, 1, cor.test(x, y = Y, method = method)$p.value)
-  }, Y = Y, method = method)
-
-  rank(listp) <= rank
-}
-
 estimate_blip_multi_lasso <- function(data, covar, blip, nfolds) {
 
 }
@@ -154,6 +154,15 @@ find_optimal_rule <- function(levels, blips, minimize = FALSE) {
     blips <- blips * -1
   }
   levels[max.col(blips)]
+}
+
+type_1_blip <- function(..., ref) {
+  objs <- list(...)
+  eif_ref <- ref$eif
+  purrr::map_dfc(objs, \(x) x$eif) |>
+    stats::setNames(paste0("blip", seq_along(objs))) |>
+    as.data.frame() |>
+    (\(x) x - eif_ref)()
 }
 
 type_2_blip <- function(...) {
