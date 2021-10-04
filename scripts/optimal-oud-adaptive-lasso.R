@@ -56,9 +56,9 @@ fit_adaptive_lasso <- function(fold, data, covar, type) {
     min_weight()
 
   fit <- cv.glmnet(
-    model.matrix(~ -1 + ., .train[, covar]),
+    model.matrix(~ ., .train[, covar])[, -1],
     as.matrix(.train[, paste0("blip", .n)]),
-    family = "mgaussian", penalty.factor = penalty
+    family = "mgaussian", penalty.factor = penalty[-1]
   )
 
   list(
