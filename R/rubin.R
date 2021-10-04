@@ -1,6 +1,4 @@
-lmtp_type <- function(x) {
-    structure(x, class = class(x[[1]]))
-}
+lmtp_type <- \(x) structure(x, class = class(x[[1]]))
 
 rubins_rules <- \(x, ...) UseMethod("rubins_rules", lmtp_type(x))
 

@@ -1,9 +1,9 @@
 library(lmtp)
 library(purrr)
 
-box::use(../R/rubin[...])
+box::use(../R/rubin[...], here[here])
 
-read_results <- \(x) readRDS(here::here("data", "drv", x))
+read_results <- \(x) readRDS(here("data", "drv", x))
 
 marginal_tsms <- read_results("onestep-tsm-imputed.rds")
 
@@ -16,29 +16,30 @@ met <- lapply(marginal_tsms, \(x) x$met)
 nal <- lapply(marginal_tsms, \(x) x$nal)
 bup <- lapply(marginal_tsms, \(x) x$bup)
 
-# TSM when receiving medication with P(A = a) = 1
-rubins_rules(met)
-rubins_rules(nal)
-rubins_rules(bup)
+ans <- list(
+  # TSM when receiving medication with P(A = a) = 1
+  all_methadone = rubins_rules(met),
+  all_naltrexone = rubins_rules(nal),
+  all_bupenorphine = rubins_rules(bup),
 
-# TSM under estimated optimal rules
-rubins_rules(al_t1)
-rubins_rules(sl_t1)
-rubins_rules(al_t2)
-rubins_rules(sl_t2)
+  # TSM under estimated optimal rules
+  opt_lasso_t1 = rubins_rules(al_t1),
+  opt_sl_t1 = rubins_rules(sl_t1),
+  opt_lasso_t2 = rubins_rules(al_t2),
+  opt_sl_t2 = rubins_rules(sl_t2),
 
-# contrasts between the estimates
-map(
-  list(met = met, nal = nal, bup = bup),
-  \(z) map2(al_t1, z, \(x, y) lmtp_contrast(x, ref = y))
-) |>
-  map(rubins_rules)
+  # contrasts between the estimates
+  contrast_lasso_t1 = map(
+    list(met = met, nal = nal, bup = bup),
+    \(z) map2(al_t1, z, \(x, y) lmtp_contrast(x, ref = y))
+  ) |>
+    map(rubins_rules),
 
-map(
-  list(met = met, nal = nal, bup = bup),
-  \(z) map2(sl_t1, z, \(x, y) lmtp_contrast(x, ref = y))
-) |>
-  map(rubins_rules)
+  contrast_sl_t1 = map(
+    list(met = met, nal = nal, bup = bup),
+    \(z) map2(sl_t1, z, \(x, y) lmtp_contrast(x, ref = y))
+  ) |>
+    map(rubins_rules)
+)
 
-
-
+saveRDS(ans, here("data", "drv", "results.rds"))
