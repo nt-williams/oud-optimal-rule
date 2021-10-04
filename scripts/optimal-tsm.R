@@ -3,7 +3,7 @@ library(future)
 
 box::use(../R/blip, ../R/utils[...], here[here], glue[glue])
 
-model <- "super-learner-type1"
+model <- "adaptLASSO-type2"
 
 progressr::handlers(global = TRUE)
 

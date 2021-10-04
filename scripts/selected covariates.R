@@ -2,28 +2,25 @@ library(glmnet)
 
 blips <- readRDS(here::here("data", "drv", "estimated-adaptLASSO-type1-blips.rds"))
 
-blip1 <-
-  lapply(blips, \(x) lapply(x$selected, \(y) y$blip1)) |>
-  unlist() |>
-  lapply(\(x) as.matrix(x)) |>
-  lapply(\(x) x != 0) |>
-  (\(x) Reduce(`+`, x) / 50)()
+selected <- function(x, blip, prop = TRUE, name) {
+  out <-
+    lapply(x, \(x) lapply(x$selected, \(y) y[[blip]])) |>
+    unlist() |>
+    lapply(\(x) as.matrix(x)) |>
+    (\(x) if (prop) lapply(x, \(y) y != 0) else x)() |>
+    (\(x) Reduce(`+`, x) / 50)()
 
-lapply(blips, \(x) lapply(x$selected, \(y) y$blip1)) |>
-  unlist() |>
-  lapply(\(x) as.matrix(x)) |>
-  (\(x) Reduce(`+`, x) / 50)() |>
-  round(4)
+  colnames(out) <- name
+  out[-1, , drop = FALSE]
+}
 
-blip2 <-
-  lapply(blips, \(x) lapply(x$selected, \(y) y$blip2)) |>
-  unlist() |>
-  lapply(\(x) as.matrix(x)) |>
-  lapply(\(x) x != 0) |>
-  (\(x) Reduce(`+`, x) / 50)()
+prop_selected <- cbind(
+  selected(blips, "blip1", name = "Methadone vs. Bupenorphine"),
+  selected(blips, "blip2", name = "Naltrexone vs. Bupenorpine")
+)
 
-lapply(blips, \(x) lapply(x$selected, \(y) y$blip2)) |>
-  unlist() |>
-  lapply(\(x) as.matrix(x)) |>
-  (\(x) Reduce(`+`, x) / 50)() |>
+mean_coef <- cbind(
+  selected(blips, "blip1", FALSE, name = "Methadone vs. Bupenorphine"),
+  selected(blips, "blip2", FALSE, name = "Naltrexone vs. Bupenorpine")
+) |>
   round(4)

@@ -1,9 +1,11 @@
+# Currently only considering main effects...
+
 library(lmtp)
 library(glmnet)
 
 box::use(../R/blip, ../R/utils[...], here[here], glue[glue])
 
-blip_type <- "type1"
+blip_type <- "type2"
 
 # importing imputed data and "CATEs"
 oud <- readRDS(here("data", "drv", "imputed-coded.rds"))
@@ -64,7 +66,7 @@ fit_adaptive_lasso <- function(fold, data, covar, type) {
   list(
     selected = coef(fit, s = "lambda.min"),
     pred = predict(fit, s = "lambda.min", gamma = c(1), relax = TRUE,
-                   newx = model.matrix(~ -1 + ., .valid[, covar]))[, , 1]
+                   newx = model.matrix(~ ., .valid[, covar])[, -1])[, , 1]
   )
 }
 
