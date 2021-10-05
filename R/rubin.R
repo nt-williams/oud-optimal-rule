@@ -2,7 +2,7 @@ lmtp_type <- \(x) structure(x, class = class(x[[1]]))
 
 rubins_rules <- \(x, ...) UseMethod("rubins_rules", lmtp_type(x))
 
-rubins_rules.lmtp <- function(lmtps, alpha = 0.05) {
+rubins_rules.lmtp <- function(lmtps, label, alpha = 0.05) {
     thetas <- unlist(lapply(lmtps, \(x) x$theta))
 
     vw <- mean(unlist(lapply(lmtps, \(x) x$standard_error^2)))
@@ -11,15 +11,17 @@ rubins_rules.lmtp <- function(lmtps, alpha = 0.05) {
     theta <- mean(thetas)
     se <- pooled_se(vw, vb, length(thetas))
 
-    list(
+    data.frame(
+        label = label,
         theta = theta,
         se = se,
         alpha = alpha,
-        ci = theta + (stats::qnorm(alpha / 2) * c(1, -1)) * se
+        conf.low = theta + stats::qnorm(alpha / 2) * se,
+        conf.high = theta + (stats::qnorm(alpha / 2) * -1) * se
     )
 }
 
-rubins_rules.lmtp_contrast <- function(lmtps, alpha = 0.05) {
+rubins_rules.lmtp_contrast <- function(lmtps, label, alpha = 0.05) {
     thetas <- unlist(lapply(lmtps, \(x) x$vals$theta))
 
     vw <- mean(unlist(lapply(lmtps, \(x) x$vals$std.error^2)))
@@ -28,11 +30,13 @@ rubins_rules.lmtp_contrast <- function(lmtps, alpha = 0.05) {
     theta <- mean(thetas)
     se <- pooled_se(vw, vb, length(thetas))
 
-    list(
+    data.frame(
+        label = label,
         theta = theta,
         se = se,
         alpha = alpha,
-        ci = theta + (stats::qnorm(alpha / 2) * c(1, -1)) * se
+        conf.low = theta + stats::qnorm(alpha / 2) * se,
+        conf.high = theta + (stats::qnorm(alpha / 2) * -1) * se
     )
 }
 

@@ -11,13 +11,13 @@ selected <- function(x, blip, prop = TRUE, name) {
     (\(x) Reduce(`+`, x) / 50)()
 
   colnames(out) <- name
-  out[-1, , drop = FALSE]
+  out
 }
 
 prop_selected <- cbind(
   selected(blips, "blip1", name = "Methadone vs. Bupenorphine"),
   selected(blips, "blip2", name = "Naltrexone vs. Bupenorpine")
-)
+)[-1, , drop = FALSE]
 
 mean_coef <- cbind(
   selected(blips, "blip1", FALSE, name = "Methadone vs. Bupenorphine"),
