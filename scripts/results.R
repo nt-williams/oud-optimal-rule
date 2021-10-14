@@ -11,7 +11,7 @@ marginals <-
   (\(r) map(c("met", "nal", "bup"), \(x) map(r, \(y) y[[x]])))()
 
 crossing("optimal-tsms-",
-         c("adaptLASSO", "lm", "super-learner"),
+         c("adaptLASSO", "super-learner"),
          "-type1", ".rds") |>
   pmap_chr(paste0) |>
   map(read_results) -> optimals
@@ -24,8 +24,7 @@ ans <- rbind(
 
   # TSM under estimated optimal rules
   rubins_rules(optimals[[1]], "LASSO"),
-  rubins_rules(optimals[[2]], "Simple"),
-  rubins_rules(optimals[[3]], "SL"),
+  rubins_rules(optimals[[2]], "SL"),
 
   # contrasts between the estimates
   map(
@@ -39,29 +38,41 @@ ans <- rbind(
       rubins_rules
     ),
 
-  # contrasts between the estimates
   map(
     list(marginals[[1]], marginals[[2]], marginals[[3]]),
     \(z) map2(optimals[[2]], z, \(x, y) lmtp_contrast(x, ref = y))
-  ) |>
-    map2_dfr(
-      c("RD: methadone, Simple",
-        "RD: naltrexone, Simple",
-        "RD: buprenorphine, Simple"),
-      rubins_rules
-    ),
-
-  map(
-    list(marginals[[1]], marginals[[2]], marginals[[3]]),
-    \(z) map2(optimals[[3]], z, \(x, y) lmtp_contrast(x, ref = y))
   ) |>
     map2_dfr(
       c("RD: methadone, SL",
         "RD: naltrexone, SL",
         "RD: buprenorphine, SL"),
       rubins_rules
+    ),
+
+  map(
+    list(marginals[[1]], marginals[[2]], marginals[[3]]),
+    \(z) map2(optimals[[1]], z, \(x, y) lmtp_contrast(x, ref = y, type = "rr"))
+  ) |>
+    map2_dfr(
+      c("RR: methadone, LASSO",
+        "RR: naltrexone, LASSO",
+        "RR: buprenorphine, LASSO"),
+      rubins_rules
+    ),
+
+  map(
+    list(marginals[[1]], marginals[[2]], marginals[[3]]),
+    \(z) map2(optimals[[2]], z, \(x, y) lmtp_contrast(x, ref = y, type = "rr"))
+  ) |>
+    map2_dfr(
+      c("RR: methadone, SL",
+        "RR: naltrexone, SL",
+        "RR: buprenorphine, SL"),
+      rubins_rules
     )
 )
+
+saveRDS(ans, here::here("data", "drv", "estimates.rds"))
 
 ans |>
   filter(!grepl("^RD", label)) |>
@@ -130,5 +141,4 @@ ans |>
   plot_layout(guides = "collect")
 
 ggsave(here("plots", "figure-1.png"))
-
 saveRDS(ans, here("data", "drv", "results.rds"))
