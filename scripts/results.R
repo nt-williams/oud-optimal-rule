@@ -10,10 +10,10 @@ marginals <-
   read_results("onestep-tsm-imputed.rds") |>
   (\(r) map(c("met", "nal", "bup"), \(x) map(r, \(y) y[[x]])))()
 
-c("optimal-tsms-adaptLASSO-type1.rds",
-  "optimal-tsms-adaptLASSO-type2.rds",
-  "optimal-tsms-super-learner-type1.rds",
-  "optimal-tsms-super-learner-type2.rds") |>
+crossing("optimal-tsms-",
+         c("adaptLASSO", "lm", "super-learner"),
+         "-type1", ".rds") |>
+  pmap_chr(paste0) |>
   map(read_results) -> optimals
 
 ans <- rbind(
@@ -24,12 +24,13 @@ ans <- rbind(
 
   # TSM under estimated optimal rules
   rubins_rules(optimals[[1]], "LASSO"),
+  rubins_rules(optimals[[2]], "Simple"),
   rubins_rules(optimals[[3]], "SL"),
 
   # contrasts between the estimates
   map(
     list(marginals[[1]], marginals[[2]], marginals[[3]]),
-    \(z) map2(al_t1, z, \(x, y) lmtp_contrast(x, ref = y))
+    \(z) map2(optimals[[1]], z, \(x, y) lmtp_contrast(x, ref = y))
   ) |>
     map2_dfr(
       c("RD: methadone, LASSO",
@@ -38,9 +39,21 @@ ans <- rbind(
       rubins_rules
     ),
 
+  # contrasts between the estimates
   map(
     list(marginals[[1]], marginals[[2]], marginals[[3]]),
-    \(z) map2(sl_t1, z, \(x, y) lmtp_contrast(x, ref = y))
+    \(z) map2(optimals[[2]], z, \(x, y) lmtp_contrast(x, ref = y))
+  ) |>
+    map2_dfr(
+      c("RD: methadone, Simple",
+        "RD: naltrexone, Simple",
+        "RD: buprenorphine, Simple"),
+      rubins_rules
+    ),
+
+  map(
+    list(marginals[[1]], marginals[[2]], marginals[[3]]),
+    \(z) map2(optimals[[3]], z, \(x, y) lmtp_contrast(x, ref = y))
   ) |>
     map2_dfr(
       c("RD: methadone, SL",
@@ -53,8 +66,8 @@ ans <- rbind(
 ans |>
   filter(!grepl("^RD", label)) |>
   mutate(
-    label = if_else(label %in% c("LASSO", "SL"), "Rule", label),
-    model = c(rep("none", 3), "LASSO", "SL")
+    label = if_else(label %in% c("LASSO", "Simple", "SL"), "Rule", label),
+    model = c(rep("none", 3), "LASSO", "Simple", "SL")
   ) |>
   ggplot(aes(
     x = factor(
@@ -62,23 +75,25 @@ ans |>
       levels = c("Buprenorphine", "Methadone", "Naltrexone", "Rule")
     ),
     y = theta,
-    linetype = factor(model, levels = c("none", "LASSO", "SL"))
+    linetype = factor(model, levels = c("none", "LASSO", "Simple", "SL"))
   )) +
-  geom_point(position = position_dodge(.5)) +
+  geom_point(position = position_dodge(.75)) +
   geom_errorbar(
     aes(
       ymin = conf.low,
       ymax = conf.high,
-      linetype = factor(model, levels = c("none", "LASSO", "SL"))
+      linetype = factor(model, levels = c("none", "LASSO", "Simple", "SL"))
     ),
     width = 0.2,
-    position = position_dodge(.5)
+    position = position_dodge(.75)
   ) +
-  coord_cartesian(ylim = c(0.25, 0.75)) +
-  scale_linetype_discrete(breaks = c("LASSO", "SL")) +
-  labs(x = NULL,
-       y = "Expected risk of relapse by 12-weeks",
-       linetype = NULL) +
+  coord_cartesian(ylim = c(0.2, 0.75)) +
+  scale_linetype_discrete(breaks = c("LASSO", "Simple", "SL")) +
+  labs(
+    x = NULL,
+    y = "Expected risk of relapse by 12-weeks",
+    linetype = NULL
+  ) +
   theme_bw() + {
     ans |>
       filter(grepl("^RD", label)) |>
@@ -93,16 +108,17 @@ ans |>
         y = theta,
         linetype = model
       )) +
-      geom_point(position = position_dodge(0.5)) +
+      geom_point(position = position_dodge(0.75)) +
       geom_errorbar(
         aes(
           ymin = conf.low,
           ymax = conf.high,
         ),
         width = 0.2,
-        position = position_dodge(0.5)
+        position = position_dodge(0.75)
       ) +
-      scale_linetype_manual(values = c("dashed", "longdash"), guide = NULL) +
+      geom_hline(yintercept = 0) +
+      scale_linetype_manual(values = c("22", "42", "44"), guide = NULL) +
       labs(
         x = NULL,
         y = "Expected difference in risk of relapse by 12-weeks",
@@ -112,5 +128,7 @@ ans |>
       theme_bw()
   } +
   plot_layout(guides = "collect")
+
+ggsave(here("plots", "figure-1.png"))
 
 saveRDS(ans, here("data", "drv", "results.rds"))

@@ -5,7 +5,10 @@ library(glmnet)
 
 box::use(../R/blip, ../R/utils[...], here[here], glue[glue])
 
-blip_type <- "type2"
+blip_type <- "type1"
+crossfit <- TRUE
+
+V <- ifelse(crossfit, 10, 1)
 
 # importing imputed data and "CATEs"
 oud <- readRDS(here("data", "drv", "imputed-coded.rds"))
@@ -25,6 +28,10 @@ min_weight <- function(x) {
 
 adaptive_lasso <- function(data, covar, nfolds, blip_type) {
   folds <- origami::make_folds(data, V = nfolds)
+
+  if (nfolds == 1) {
+    folds[[1]]$training_set <- folds[[1]]$validation_set
+  }
 
   blip_preds <- lapply(folds, \(x) fit_adaptive_lasso(x, data, covar, blip_type))
 
@@ -55,7 +62,8 @@ fit_adaptive_lasso <- function(fold, data, covar, type) {
   penalty <-
     lm(.f, data = .train) |>
     (\(x) 1 / abs(x$coefficients))() |>
-    min_weight()
+    min_weight() |>
+    (\(x) ifelse(is.na(x), 2000, x))()
 
   fit <- cv.glmnet(
     model.matrix(~ ., .train[, covar])[, -1],
@@ -65,13 +73,15 @@ fit_adaptive_lasso <- function(fold, data, covar, type) {
 
   list(
     selected = coef(fit, s = "lambda.min"),
-    pred = predict(fit, s = "lambda.min", gamma = c(1), relax = TRUE,
-                   newx = model.matrix(~ ., .valid[, covar])[, -1])[, , 1]
+    pred = predict(
+      fit, s = "lambda.min", gamma = c(1), relax = TRUE,
+      newx = model.matrix(~ ., .valid[, covar])[, -1]
+    )[, , 1]
   )
 }
 
 # estimating blips
-blips <- lapply(.data, \(x) adaptive_lasso(x, w, 10, blip_type))
+blips <- lapply(.data, \(x) adaptive_lasso(x, w, V, blip_type))
 
 # find the optimal rule
 if (blip_type == "type1") {
@@ -94,10 +104,10 @@ if (blip_type == "type2") {
 }
 
 # save results
-glue("estimated-adaptLASSO-{blip_type}-blips.rds") |>
+glue("estimated-adaptLASSO-{crossfit}-{blip_type}-blips.rds") |>
   (\(x) here("data", "drv", x))() |>
   (\(x) saveRDS(blips, x))()
 
-glue("estimated-adaptLASSO-{blip_type}-rules.rds") |>
+glue("estimated-adaptLASSO-{crossfit}-{blip_type}-rules.rds") |>
   (\(x) here("data", "drv", x))() |>
   (\(x) saveRDS(rules, x))()
