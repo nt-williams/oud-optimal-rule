@@ -6,13 +6,13 @@ library(glmnet)
 box::use(../R/blip, ../R/utils[...], here[here], glue[glue])
 
 blip_type <- "type1"
-crossfit <- TRUE
+crossfit <- FALSE
 
 V <- ifelse(crossfit, 10, 1)
 
 # importing imputed data and "CATEs"
-oud <- readRDS(here("data", "drv", "imputed-coded.rds"))
-cates <- readRDS(here("data", "drv", glue("{blip_type}-blips.rds")))
+oud <- readRDS(here("data", "drv", "imputed-no-27bup.rds"))
+cates <- readRDS(here("data", "drv", glue("{blip_type}-blips-no27bup.rds")))
 
 # merging blips and potential effect modifiers
 .data <- purrr::map2(oud, cates, \(x, y) cbind(x[, w], y))
@@ -36,6 +36,7 @@ adaptive_lasso <- function(data, covar, nfolds, blip_type) {
   blip_preds <- lapply(folds, \(x) fit_adaptive_lasso(x, data, covar, blip_type))
 
   list(
+    fit = lapply(blip_preds, \(x) x$fit),
     selected = lapply(blip_preds, \(x) x$selected),
     pred = {
       purrr::map(folds, \(x) x$validation_set) |>
@@ -72,6 +73,7 @@ fit_adaptive_lasso <- function(fold, data, covar, type) {
   )
 
   list(
+    fit = fit,
     selected = coef(fit, s = "lambda.min"),
     pred = predict(
       fit, s = "lambda.min", gamma = c(1), relax = TRUE,
@@ -104,10 +106,10 @@ if (blip_type == "type2") {
 }
 
 # save results
-glue("estimated-adaptLASSO-{crossfit}-{blip_type}-blips.rds") |>
+glue("estimated-adaptLASSO-{crossfit}-{blip_type}-blips-no27bup.rds") |>
   (\(x) here("data", "drv", x))() |>
   (\(x) saveRDS(blips, x))()
 
-glue("estimated-adaptLASSO-{crossfit}-{blip_type}-rules.rds") |>
+glue("estimated-adaptLASSO-{crossfit}-{blip_type}-rules-no27bup.rds") |>
   (\(x) here("data", "drv", x))() |>
   (\(x) saveRDS(rules, x))()

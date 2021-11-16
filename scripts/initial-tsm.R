@@ -6,12 +6,13 @@ library(future)
 plan(multisession)
 
 # load functions
-box::use(./R/blip, ./R/utils[...])
+box::use(../R/blip, ../R/utils[...])
 
 progressr::handlers(global = TRUE)
 
 # importing imputed data
-oud <- readRDS(here::here("data", "drv", "imputed-coded.rds"))
+# oud <- readRDS(here::here("data", "drv", "imputed-coded.rds"))
+oud <- readRDS(here::here("data", "drv", "imputed-no-27bup.rds"))
 
 # creating one-step estimator function
 onestep <- purrr::partial(
@@ -44,4 +45,5 @@ for (i in seq_along(oud)) {
 }
 
 # saving TSM fits and blips
-saveRDS(tsms, here::here("data", "drv", "onestep-tsm-imputed.rds"))
+# saveRDS(tsms, here::here("data", "drv", "onestep-tsm-imputed.rds"))
+saveRDS(tsms, here::here("data", "drv", "onestep-tsm-imputed-no27bup.rds"))

@@ -25,4 +25,10 @@ imputed <- map(imputed, function(data) {
   )
 })
 
+no_27bup <- map(imputed, function(data) {
+  filter(data, project == "27" & medicine != "bup") |>
+    bind_rows((filter(data, project %in% c("30", "51"))))
+})
+
 saveRDS(imputed, here::here("data", "drv", "imputed-coded.rds"))
+saveRDS(no_27bup, here::here("data", "drv", "imputed-no-27bup.rds"))

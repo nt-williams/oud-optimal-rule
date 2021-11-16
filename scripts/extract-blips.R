@@ -4,7 +4,8 @@ box::use(../R/blip, here[here], glue[glue])
 blip_type <- "type1"
 
 # importing estimated TSMs
-tsms <- readRDS(here("data", "drv", "onestep-tsm-imputed.rds"))
+# tsms <- readRDS(here("data", "drv", "onestep-tsm-imputed.rds"))
+tsms <- readRDS(here("data", "drv", "onestep-tsm-imputed-no27bup.rds"))
 
 # extract blip
 cates <- lapply(tsms, function(x) {
@@ -13,4 +14,4 @@ cates <- lapply(tsms, function(x) {
          type2 = blip$type_2_blip(x$met, x$bup, x$nal))
 })
 
-saveRDS(cates, here("data", "drv", glue("{blip_type}-blips.rds")))
+saveRDS(cates, here("data", "drv", glue("{blip_type}-blips-no27bup.rds")))

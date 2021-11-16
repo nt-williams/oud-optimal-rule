@@ -7,12 +7,12 @@ box::use(../R/rubin[...], here[here])
 read_results <- \(x) readRDS(here("data", "drv", x))
 
 marginals <-
-  read_results("onestep-tsm-imputed.rds") |>
+  read_results("onestep-tsm-imputed-no27bup.rds") |>
   (\(r) map(c("met", "nal", "bup"), \(x) map(r, \(y) y[[x]])))()
 
 crossing("optimal-tsms-",
          c("adaptLASSO", "super-learner"),
-         "-type1", ".rds") |>
+         "-type1-no27bup", ".rds") |>
   pmap_chr(paste0) |>
   map(read_results) -> optimals
 
@@ -72,13 +72,13 @@ ans <- rbind(
     )
 )
 
-saveRDS(ans, here::here("data", "drv", "estimates.rds"))
+saveRDS(ans, here::here("data", "drv", "estimates-no27bup.rds"))
 
 ans |>
-  filter(!grepl("^RD", label)) |>
+  filter(!grepl("^RD|^RR", label)) |>
   mutate(
-    label = if_else(label %in% c("LASSO", "Simple", "SL"), "Rule", label),
-    model = c(rep("none", 3), "LASSO", "Simple", "SL")
+    label = if_else(label %in% c("LASSO", "SL"), "Rule", label),
+    model = c(rep("none", 3), "hat(d)(v)^lasso", "hat(d)(v)^sl")
   ) |>
   ggplot(aes(
     x = factor(
@@ -86,34 +86,41 @@ ans |>
       levels = c("Buprenorphine", "Methadone", "Naltrexone", "Rule")
     ),
     y = theta,
-    linetype = factor(model, levels = c("none", "LASSO", "Simple", "SL"))
+    linetype = factor(model, levels = c("none", "hat(d)(v)^lasso", "hat(d)(v)^sl"))
   )) +
   geom_point(position = position_dodge(.75)) +
   geom_errorbar(
     aes(
       ymin = conf.low,
       ymax = conf.high,
-      linetype = factor(model, levels = c("none", "LASSO", "Simple", "SL"))
+      linetype = factor(model, levels = c("none", "hat(d)(v)^lasso", "hat(d)(v)^sl"))
     ),
     width = 0.2,
     position = position_dodge(.75)
   ) +
   coord_cartesian(ylim = c(0.2, 0.75)) +
-  scale_linetype_discrete(breaks = c("LASSO", "Simple", "SL")) +
+  scale_linetype_discrete(
+    breaks = c("hat(d)(v)^lasso", "hat(d)(v)^sl"),
+    labels = scales::parse_format()
+  ) +
   labs(
     x = NULL,
     y = "Expected risk of relapse by 12-weeks",
     linetype = NULL
   ) +
-  theme_bw() + {
+  theme_bw() +
+  theme(legend.text.align = 0) + {
     ans |>
       filter(grepl("^RD", label)) |>
       separate(label, c("label", "model"), sep = ",") |>
-      mutate(label = case_when(
-        grepl("methadone", label) ~ "Methadone",
-        grepl("naltrexone", label) ~ "Naltrexone",
-        TRUE ~ "Buprenorphine"
-      )) |>
+      mutate(
+        label = case_when(
+          grepl("methadone", label) ~ "Methadone",
+          grepl("naltrexone", label) ~ "Naltrexone",
+          TRUE ~ "Buprenorphine"
+        ),
+        model = if_else(model == " LASSO", "hat(d)(v)^lasso", "hat(d)(v)^sl")
+      ) |>
       ggplot(aes(
         x = label,
         y = theta,
@@ -129,16 +136,15 @@ ans |>
         position = position_dodge(0.75)
       ) +
       geom_hline(yintercept = 0) +
-      scale_linetype_manual(values = c("22", "42", "44"), guide = NULL) +
+      scale_linetype_manual(values = c("22", "42"), guide = NULL) +
       labs(
         x = NULL,
         y = "Expected difference in risk of relapse by 12-weeks",
         linetype = NULL
       ) +
-      coord_cartesian(ylim = c(-0.35, 0)) +
+      coord_cartesian(ylim = c(-0.3, 0.1)) +
       theme_bw()
   } +
   plot_layout(guides = "collect")
 
-ggsave(here("plots", "figure-1.png"))
-saveRDS(ans, here("data", "drv", "results.rds"))
+ggsave(here("plots", "figure-no27bup.png"))

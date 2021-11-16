@@ -7,9 +7,9 @@ box::use(../R/blip, ../R/utils[...], here[here], glue[glue])
 blip_type <- "type1"
 
 # importing imputed data and "CATEs"
-oud <- readRDS(here("data", "drv", "imputed-coded.rds"))
+oud <- readRDS(here("data", "drv", "imputed-no-27bup.rds"))
 
-glue("{blip_type}-blips.rds") |>
+glue("{blip_type}-blips-no27bup.rds") |>
   (\(x) here("data", "drv", x))() |>
   readRDS() -> cates
 
@@ -60,10 +60,10 @@ if (blip_type == "type2") {
 }
 
 # save results
-glue("estimated-super-learner-{blip_type}-blips.rds") |>
+glue("estimated-super-learner-{blip_type}-blips-no27bup.rds") |>
   (\(x) here("data", "drv", x))() |>
   (\(x) saveRDS(blips, x))()
 
-glue("estimated-super-learner-{blip_type}-rules.rds") |>
+glue("estimated-super-learner-{blip_type}-rules-no27bup.rds") |>
   (\(x) here("data", "drv", x))() |>
   (\(x) saveRDS(rules, x))()
