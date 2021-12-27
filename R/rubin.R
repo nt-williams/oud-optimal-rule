@@ -4,7 +4,7 @@ rubins_rules <- \(x, ...) UseMethod("rubins_rules", lmtp_type(x))
 
 rubins_rules.numeric <- function(eifs, label, alpha = 0.05) {
     thetas <- unlist(lapply(eifs, mean))
-    vw <- mean(unlist(lapply(eifs, \(x) var(x) / length(x))))
+    vw <- mean(unlist(lapply(eifs, \(x) stats::var(x) / length(x))))
     vb <- stats::var(thetas)
     theta <- mean(thetas)
     se <- pooled_se(vw, vb, length(thetas))

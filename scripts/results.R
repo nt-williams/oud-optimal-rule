@@ -74,6 +74,8 @@ ans <- rbind(
 
 saveRDS(ans, here::here("data", "drv", "estimates-no27bup.rds"))
 
+ragg::agg_png("plots/figure•no27bup.png", width = 8, height = 4, units = "cm", res = 400)
+
 ans |>
   filter(!grepl("^RD|^RR", label)) |>
   mutate(
@@ -88,17 +90,19 @@ ans |>
     y = theta,
     linetype = factor(model, levels = c("none", "hat(d)(v)^lasso", "hat(d)(v)^sl"))
   )) +
-  geom_point(position = position_dodge(.75)) +
+  geom_point(position = position_dodge(.75), size = 0.15) +
   geom_errorbar(
     aes(
       ymin = conf.low,
       ymax = conf.high,
       linetype = factor(model, levels = c("none", "hat(d)(v)^lasso", "hat(d)(v)^sl"))
     ),
-    width = 0.2,
-    position = position_dodge(.75)
+    width = 0.15,
+    position = position_dodge(.75),
+    size = 0.15
   ) +
-  coord_cartesian(ylim = c(0.2, 0.75)) +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  coord_cartesian(ylim = c(0.1, 0.7)) +
   scale_linetype_discrete(
     breaks = c("hat(d)(v)^lasso", "hat(d)(v)^sl"),
     labels = scales::parse_format()
@@ -108,8 +112,14 @@ ans |>
     y = "Expected risk of relapse by 12-weeks",
     linetype = NULL
   ) +
-  theme_bw() +
-  theme(legend.text.align = 0) + {
+  theme_light(base_size = 3,
+           base_line_size = 0.2,
+           base_rect_size = 0.2) +
+  theme(legend.text.align = 0,
+        legend.text = element_text(size = 3),
+        legend.key.size = unit(0.2, "cm"),
+        axis.ticks.x = element_blank()) +
+  guides(shape = guide_legend(override.aes = list(size = 0.5))) + {
     ans |>
       filter(grepl("^RD", label)) |>
       separate(label, c("label", "model"), sep = ",") |>
@@ -126,25 +136,32 @@ ans |>
         y = theta,
         linetype = model
       )) +
-      geom_point(position = position_dodge(0.75)) +
+      geom_point(position = position_dodge(0.75), size = 0.15) +
       geom_errorbar(
         aes(
           ymin = conf.low,
           ymax = conf.high,
         ),
         width = 0.2,
-        position = position_dodge(0.75)
+        position = position_dodge(0.75),
+        size = 0.15
       ) +
-      geom_hline(yintercept = 0) +
+      geom_hline(yintercept = 0, size = 0.15) +
       scale_linetype_manual(values = c("22", "42"), guide = NULL) +
       labs(
         x = NULL,
         y = "Expected difference in risk of relapse by 12-weeks",
         linetype = NULL
       ) +
-      coord_cartesian(ylim = c(-0.3, 0.1)) +
-      theme_bw()
+      coord_cartesian(ylim = c(-0.5, 0.1)) +
+      theme_light(base_size = 3,
+               base_line_size = 0.2,
+               base_rect_size = 0.2) +
+      theme(legend.text = element_text(size = 3),
+            legend.key.size = unit(0.2, "cm"),
+            axis.ticks.x = element_blank()) +
+      guides(shape = guide_legend(override.aes = list(size = 0.5)))
   } +
   plot_layout(guides = "collect")
 
-ggsave(here("plots", "figure-no27bup.png"))
+dev.off()
