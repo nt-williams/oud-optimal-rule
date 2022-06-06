@@ -14,6 +14,26 @@ oud |>
   (\(x) x[[1]])() |>
   (\(x) x$project == "27")() -> in27
 
+by_study <- catfun::prop_test(oud[[1]], project, week_12_relapse, rev = "columns")
+
+by_study <- data.frame(
+  project = c("CTN0027", "CTN0030", "CTN0051"),
+  relapse = as.vector(by_study$estimate)
+) |>
+  cbind(by_study$method_ci)
+
+saveRDS(by_study, here::here("data", "drv", "observed-by-study-relapse.rds"))
+
+by_medicine <- catfun::prop_test(oud[[1]], medicine, week_12_relapse, rev = "columns")
+
+by_medicine <- data.frame(
+  medicine = c("bup", "met", "nal"),
+  relapse = as.vector(by_medicine$estimate)
+) |>
+  cbind(by_medicine$method_ci)
+
+saveRDS(by_medicine, here::here("data", "drv", "observed-by-medicine-relapse.rds"))
+
 # creating one-step estimator function
 onestep <- purrr::partial(
   lmtp_sdr,
