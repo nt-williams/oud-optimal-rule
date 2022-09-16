@@ -98,7 +98,7 @@ glue::glue(
   History of anxiety disorder & <total$anxiety> & <by_project$`27`$anxiety> & <by_project$`30`$anxiety> & <by_project$`51`$anxiety> \\\\ \
   Opioid withdrawl discomfort (1-4) & <total$hwithdraw> (<total$hwithdraw_sd>) & <by_project$`27`$hwithdraw> (<by_project$`27`$hwithdraw_sd>) & <by_project$`30`$hwithdraw> (<by_project$`30`$hwithdraw_sd>) & <by_project$`51`$hwithdraw> (<by_project$`51`$hwithdraw_sd>) \\\\ \
   Week of relapse & <total$rweek> (<total$rweek_sd>) & <by_project$`27`$rweek> (<by_project$`27`$rweek_sd>) & <by_project$`30`$rweek> (<by_project$`30`$rweek_sd>) & <by_project$`51`$rweek> (<by_project$`51`$rweek_sd>) \\\\ \
-  Relapses by week 12 & <total$w12> & <by_project$`27`$w12> & <by_project$`30`$w12> & <by_project$`51`$w12> \\\\ \
+  No. of relapses by week 12 & <total$w12> & <by_project$`27`$w12> & <by_project$`30`$w12> & <by_project$`51`$w12> \\\\ \
   \\bottomrule
   \\label{tab:t1}
   \\end{tabular}

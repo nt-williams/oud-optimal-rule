@@ -148,7 +148,7 @@ ans |>
     y = "Expected risk of relapse by 12-weeks",
     linetype = NULL
   ) +
-  theme_light(base_size = 3,
+  theme_classic(base_size = 3,
            base_line_size = 0.2,
            base_rect_size = 0.2) +
   theme(legend.text.align = 0,
@@ -190,7 +190,7 @@ ans |>
         linetype = NULL
       ) +
       coord_cartesian(ylim = c(-0.5, 0.1)) +
-      theme_light(base_size = 3,
+      theme_classic(base_size = 3,
                base_line_size = 0.2,
                base_rect_size = 0.2) +
       theme(legend.text = element_text(size = 3),
