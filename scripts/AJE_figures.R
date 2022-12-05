@@ -59,7 +59,7 @@ p1 <- ans |>
     y = theta,
     linetype = factor(model, levels = c("Observed", "Estimated", "hat(d)^lasso", "hat(d)^sl"))
   )) +
-  geom_point(position = position_dodge(.75), size = pt_to_mm(1)) +
+  geom_point(position = position_dodge(.75), size = pt_to_mm(3)) +
   geom_errorbar(
     aes(
       ymin = conf.low,
@@ -79,7 +79,7 @@ p1 <- ans |>
   ) +
   labs(
     x = "Treatment",
-    y = "Expected Risk of Relapse by 12-weeks",
+    y = "Expected Risk of Relapse by 12 Weeks",
     linetype = expression(underline("Estimand"))
   ) +
   theme_classic(base_size = 8,
@@ -89,11 +89,12 @@ p1 <- ans |>
         legend.background = element_rect(fill = "white",
                                          color = "black",
                                          size = pt_to_mm(1)),
-        text = element_text(size = 9),
-        axis.text = element_text(size = 9, colour = "black"),
+        text = element_text(size = 9, color = "black", face = "plain", family = "sans"),
+        axis.text = element_text(size = 9, color = "black", face = "plain", family = "sans"),
+        axis.title = element_text(size = 9, color = "black", face = "plain", family = "sans"),
         axis.line = element_line(size = pt_to_mm(1)),
         axis.ticks = element_line(size = pt_to_mm(1)),
-        legend.text = element_text(size = 9),
+        legend.text = element_text(size = 9, color = "black", face = "plain", family = "sans"),
         legend.text.align = 0,
         legend.title.align = 0.5) +
   guides(shape = guide_legend(override.aes = list(size = 0.5)))
@@ -114,7 +115,7 @@ p2 <- ans |>
     y = theta,
     linetype = model
   )) +
-  geom_point(position = position_dodge(0.75), size = pt_to_mm(1)) +
+  geom_point(position = position_dodge(0.75), size = pt_to_mm(3)) +
   geom_errorbar(
     aes(
       ymin = conf.low,
@@ -131,29 +132,44 @@ p2 <- ans |>
                      labels = c("0", "-0.2", "-0.4")) +
   labs(
     x = "Treatment",
-    y = "Expected Difference in Risk \nof Relapse by 12-weeks",
+    y = "Expected Difference in Risk \nof Relapse by 12 Weeks",
     linetype = NULL
   ) +
   coord_cartesian(ylim = c(-0.5, 0.1)) +
   theme_classic() +
   theme(legend.position = "none",
-        text = element_text(size = 9),
-        axis.text = element_text(size = 9, colour = "black"),
+        text = element_text(size = 9, color = "black", face = "plain", family = "sans"),
+        axis.text = element_text(size = 9, color = "black", face = "plain", family = "sans"),
+        axis.title = element_text(size = 9, color = "black", face = "plain", family = "sans"),
         axis.line = element_line(size = pt_to_mm(1)),
         axis.ticks = element_line(size = pt_to_mm(1)))
 
 pdf.options(encoding='ISOLatin2.enc')
 
-pdf("plots/AJE-00224-2022 Rudolph Figure 1.pdf", width = 8, height = 4)
-p1 + p2 + plot_layout(widths = c(0.65, 0.35))
+pdf("plots/AJE-00224-2022 Rudolph Figure 1.pdf", width = 8, height = 4, family = "sans")
+print({p1 + p2 + plot_layout(widths = c(0.65, 0.35))})
 dev.off()
 
-ggsave("plots/AJE-00224-2022 Rudolph Figure 1A.eps",
-       device = "eps",
-       plot = p1,
-       width = .65*8, height = 4, units = "in")
+cairo_ps("plots/AJE-00224-2022 Rudolph Figure 1A.eps",
+         family = "san",
+         width = .65*8, height = 4,
+         pointsize = 9)
+print(p1)
+dev.off()
 
-ggsave("plots/AJE-00224-2022 Rudolph Figure 1B.eps",
-       device = "eps",
-       plot = p2,
-       width = .35*8, height = 4, units = "in")
+cairo_ps("plots/AJE-00224-2022 Rudolph Figure 1B.eps",
+         family = "san",
+         width = .65*8, height = 4,
+         pointsize = 9)
+print(p1)
+dev.off()
+
+# ggsave("plots/AJE-00224-2022 Rudolph Figure 1A.eps",
+#        device = "eps",
+#        plot = p1,
+#        width = .65*8, height = 4, units = "in")
+#
+# ggsave("plots/AJE-00224-2022 Rudolph Figure 1B.eps",
+#        device = "eps",
+#        plot = p2,
+#        width = .35*8, height = 4, units = "in")
