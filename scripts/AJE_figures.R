@@ -128,14 +128,14 @@ p2 <- ans |>
   geom_hline(yintercept = 0, size = pt_to_mm(1), linetype = "dashed") +
   scale_linetype_manual(values = c(3, 4), guide = NULL) +
   scale_x_discrete(guide = guide_axis(angle = -45)) +
-  scale_y_continuous(breaks = c(0, -0.2, -0.4),
-                     labels = c("0", "-0.2", "-0.4")) +
+  scale_y_continuous(breaks = c(0.2, 0, -0.2, -0.4),
+                     labels = c("0.2", "0", "-0.2", "-0.4")) +
   labs(
     x = "Treatment",
     y = "Expected Difference in Risk \nof Relapse by 12 Weeks",
     linetype = NULL
   ) +
-  coord_cartesian(ylim = c(-0.5, 0.1)) +
+  coord_cartesian(ylim = c(-0.5, 0.2)) +
   theme_classic() +
   theme(legend.position = "none",
         text = element_text(size = 9, color = "black", face = "plain", family = "sans"),
@@ -159,9 +159,9 @@ dev.off()
 
 cairo_ps("plots/AJE-00224-2022 Rudolph Figure 1B.eps",
          family = "san",
-         width = .65*8, height = 4,
+         width = .35*8, height = 4,
          pointsize = 9)
-print(p1)
+print(p2)
 dev.off()
 
 # ggsave("plots/AJE-00224-2022 Rudolph Figure 1A.eps",
